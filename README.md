@@ -7,7 +7,7 @@
 ## 🛠 功能亮点
 
 - 🎯 多轮对话，支持上下文延续
-- 🤖 使用 LangChain 调用本地 Ollama 模型（如 llama3、mistral）
+- 🤖 使用 LangChain 调用本地 Ollama 模型（如 llama3、deepseek）
 - 💬 基于 `wxauto` 控制微信，监听联系人消息并自动回复
 - 🧠 每个联系人拥有独立记忆（私聊效果更自然）
 

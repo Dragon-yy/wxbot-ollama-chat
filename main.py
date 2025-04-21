@@ -48,6 +48,6 @@ while True:
                     continue
             except Exception as e:
                 print(f"处理出错: {e}")
-                chat.SendMsg("我好像有点糊涂了……稍后再试试吧~ [powered by dr@g0n]")
+                chat.SendMsg("我好像有点糊涂了……稍后再试试吧~ [powered by dragon-yy]")
 
     time.sleep(wait)
