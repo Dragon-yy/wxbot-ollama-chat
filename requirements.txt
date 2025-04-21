@@ -1,0 +1,3 @@
+wxauto
+langchain
+langchain-community
