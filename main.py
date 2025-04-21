@@ -1,53 +1,29 @@
-from wxauto import WeChat
-import time
-from chat_memory import get_conversation_chain
-import re
-from langchain_core.messages import HumanMessage
+import click
+from bot.wechat_listener import start_listening
+from bot.scheduler import start_daily_schedule
+
+@click.group()
+def cli():
+    pass
+
+@cli.command()
+@click.option('--model', default='ollama', type=click.Choice(['ollama', 'chatgpt', 'deepseek']), help='选择使用的 AI 模型')
+@click.option('--listen-list', default="", help='逗号分隔的监听对象，例如：妈,老婆,好友群')
+def listen(model, listen_list):
+    """启动微信监听机器人"""
+    # 解析监听对象列表
+    listen_targets = [item.strip() for item in listen_list.split(',')] if listen_list else None
+    start_listening(model=model, listen_list=listen_targets)
+
+@cli.command()
+@click.option('--target', default='文件传输助手', help='每天定时推送的联系人')
+@click.option('--time', 'push_time', default='08:30', help='发送时间（格式如 08:30）')
+def schedule(target, push_time):
+    """开启每日信息推送功能"""
+    from wxauto import WeChat
+    wx = WeChat()
+    start_daily_schedule(wx, who=target, push_time=push_time)
 
 
-
-# 初始化微信
-wx = WeChat()
-listen_list = ['xxx']
-for i in listen_list:
-    wx.AddListenChat(who=i)
-
-# 联系人 → 对话链映射（含上下文）
-conversation_chains = {}
-
-wait = 1  # 每1秒监听一次
-while True:
-    msgs = wx.GetListenMessage()
-    for chat in msgs:
-        who = chat.who
-        one_msgs = msgs.get(chat)
-        for msg in one_msgs:
-
-            sender = msg.sender
-            if sender == "Self":
-                continue  # 忽略自己发的
-
-            content = msg.content
-            print(f"【{sender}】：{content}")
-
-            # 获取/初始化当前联系人的对话链
-            if who not in conversation_chains:
-                conversation_chains[who] = get_conversation_chain()
-
-            chain = conversation_chains[who]
-
-            try:
-                # 如果开头有@bot关键词再予以ai响应
-                if content.startswith("@bot"):
-                    response = chain.invoke({"input": content.lstrip("@bot")},config={"configurable": {"session_id": sender}})
-                    # 去除deepseek think的内容
-                    print(response)
-                    response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL).strip()
-                    chat.SendMsg(response+" [powered by dragon-yy]")
-                else:
-                    continue
-            except Exception as e:
-                print(f"处理出错: {e}")
-                chat.SendMsg("我好像有点糊涂了……稍后再试试吧~ [powered by dragon-yy]")
-
-    time.sleep(wait)
+if __name__ == '__main__':
+    cli()

@@ -1,3 +1,7 @@
 wxauto
+click
+schedule
 langchain
 langchain-community
+langchain-openai
+python-dotenv
