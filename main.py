@@ -1,13 +1,17 @@
 import click
 from bot.wechat_listener import start_listening
 from bot.scheduler import start_daily_schedule
+from dotenv import load_dotenv
+
+load_dotenv()  # 自动读取项目根目录下的 .env 文件
+
 
 @click.group()
 def cli():
     pass
 
 @cli.command()
-@click.option('--model', default='ollama', type=click.Choice(['ollama', 'chatgpt', 'deepseek']), help='选择使用的 AI 模型')
+@click.option('--model', default='ollama', type=click.Choice(['ollama', 'chatgpt', 'deepseek',  'siliconflow']), help='选择使用的 AI 模型')
 @click.option('--listen-list', default="", help='逗号分隔的监听对象，例如：妈,老婆,好友群')
 def listen(model, listen_list):
     """启动微信监听机器人"""

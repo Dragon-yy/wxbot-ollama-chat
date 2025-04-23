@@ -3,11 +3,11 @@ from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from prompt_templates import get_prompt_template
+from bot.prompt_templates import get_prompt_template
 
 
 def get_conversation_chain():
-    llm = OllamaLLM(model="deepseek-r1:8b")
+    llm = OllamaLLM(model="deepseek-r1:14b")
     prompt = get_prompt_template()
     chain = prompt | llm
 

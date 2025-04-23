@@ -14,19 +14,23 @@ def save_log(who, sender, user_input, reply):
     folder = "logs"
     os.makedirs(folder, exist_ok=True)
     filename = f"{folder}/{who}_{today}.txt"
-    with open(filename, "a", encoding="utf-8") as f:
-        f.write(f"[{sender}]：{user_input}\n")
-        f.write(f"[bot]：{reply}\n\n")
+    try:
+        with open(filename, "a", encoding="utf-8") as f:
+            f.write(f"[{sender}]：{user_input}\n")
+            f.write(f"[bot]：{reply}\n\n")
+    except Exception as e:
+        print(f"⚠️ 日志保存失败: {e}")
 
 
 def clean_response(text: str) -> str:
     # 清理 Deepseek 风格的思考信息
     return re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
 
+
 def start_listening(model="ollama", listen_list=None):
     """
     启动微信监听主逻辑
-    :param model: 使用的 AI 模型（ollama/chatgpt/deepseek）
+    :param model: 使用的 AI 模型（ollama/chatgpt/deepseek/siliconflow）
     :param listen_list: 可选的监听人名单（默认监听所有聊天窗口）
     """
     wx = WeChat()
@@ -37,7 +41,7 @@ def start_listening(model="ollama", listen_list=None):
         for i in listen_list:
             wx.AddListenChat(who=i)
     else:
-        print("⚠️ 未指定监听对象，将默认监听全部已打开的聊天窗口")
+        print("⚠️ 未指定监听对象，将默认监听所有当前打开的聊天窗口（请确保目标窗口已打开）")
 
     wait = 1  # 每秒检查一次
     while True:
@@ -53,8 +57,7 @@ def start_listening(model="ollama", listen_list=None):
                 content = msg.content
                 print(f"💬 收到 [{who} - {sender}]：{content}")
 
-                # 判断是否触发AI（@bot）
-                if not content.strip().startswith("@bot"):
+                if not content.strip().lower().startswith("@bot"):
                     continue
 
                 # 初始化对话链
@@ -62,14 +65,16 @@ def start_listening(model="ollama", listen_list=None):
                     print(f"🧠 初始化 [{who}] 的对话链，模型：{model}")
                     conversation_chains[who] = build_chain(model)
 
-                # 去除 @bot 指令后进行处理
                 user_input = content.lstrip("@bot").strip()
+                session_key = f"{who}_{sender}"
+
                 try:
                     response = conversation_chains[who].invoke({
                         "input": user_input
-                    }, config={"configurable": {"session_id": sender}})
+                    }, config={"configurable": {"session_id": session_key}})
                     response = response['output']
                     final_reply = clean_response(response)
+
                     chat.SendMsg(final_reply + "\n\n✨ Powered by Dragon-YY ✨")
                     save_log(who, sender, user_input, response)
 
