@@ -3,3 +3,5 @@
 *.pyc
 .env
 test.py
+/logs
+*.txt

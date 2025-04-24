@@ -38,7 +38,7 @@ class SiliconFlow(LLM):
         return response.json()["choices"][0]["message"]["content"]
 
     # 这里的model是silconflow上对接的模型可以自己设置
-    def _call(self, prompt: str, stop: list = None, model: str = "deepseek-ai/DeepSeek-R1") -> str:
+    def _call(self, prompt: str, stop: list = None, model: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B") -> str:
         response = self.siliconflow_completions(model=model, prompt=prompt)
         if stop is not None:
             response = enforce_stop_tokens(response, stop)
